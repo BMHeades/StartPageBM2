@@ -13,6 +13,12 @@
   --color-btn-add: #1e512a;
   --color-btn-add-text: #43d857;
   --color-btn-add-hover: #296d4a;
+  --color-btn-export: #1e3a5f;
+  --color-btn-export-text: #72c0ff;
+  --color-btn-export-hover: #294f80;
+  --color-btn-import: #3e1e5f;
+  --color-btn-import-text: #c5a6ff;
+  --color-btn-import-hover: #50297a;
   --color-link-hover: #FFFFFF;
   --font-cascadia: "Cascadia Code"
 
@@ -32,6 +38,12 @@
   }
   .btn-add{
     @apply bg-btn-add hover:bg-btn-add-hover text-btn-add-text text-sm p-1.5 ; 
+  }
+  .btn-export{
+    @apply bg-btn-export hover:bg-btn-export-hover text-btn-export-text text-sm p-1.5 ; 
+  }
+  .btn-import{
+    @apply bg-btn-import hover:bg-btn-import-hover text-btn-import-text text-sm p-1.5 ; 
   }
   a{
     @apply text-title text-xl hover:text-link-hover hover:font-bold;

@@ -121,6 +121,65 @@
       toggleEditMode()
     }
   }
+
+  function exportLocalStorage() {
+    const data: Record<string, string> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key) {
+        data[key] = localStorage.getItem(key) || "";
+      }
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "startpage-config.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  let fileInput: HTMLInputElement = $state()!;
+
+  function importLocalStorage(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result as string;
+        const data = JSON.parse(text);
+        
+        // Clear current localStorage and set new values
+        localStorage.clear();
+        for (const key in data) {
+          localStorage.setItem(key, data[key]);
+        }
+        
+        // Ensure defaults if keys are missing/empty
+        if (!localStorage.getItem("welcomeMessage")) {
+          localStorage.setItem("welcomeMessage", defaultWelcomeMessage);
+        }
+        if (!localStorage.getItem("categories")) {
+          localStorage.setItem("categories", JSON.stringify(defaultCategories));
+        }
+
+        // Update reactive state
+        welcomeMessage = localStorage.getItem("welcomeMessage") as string;
+        categories = JSON.parse(localStorage.getItem("categories") as string);
+        
+        // Reset file input value
+        input.value = "";
+      } catch (err) {
+        alert("Failed to parse the imported JSON file. Please ensure it is a valid configuration.");
+        console.error(err);
+      }
+    };
+    reader.readAsText(file);
+  }
 </script>
 
 <!-- Welcome Message -->
@@ -181,10 +240,21 @@
   
   
 </div>
-<!-- Add Category Button -->
+<!-- Add Category / Export / Import Config Buttons -->
 {#if isEditMode}
-    <button class="btn-add fixed bottom-4 left-4" onclick={addCategory}>Add Category</button>
-  {/if}
+  <div class="fixed bottom-4 left-4 flex gap-2">
+    <button class="btn-add" onclick={addCategory}>Add Category</button>
+    <button class="btn-export" onclick={exportLocalStorage}>Export Config</button>
+    <button class="btn-import" onclick={() => fileInput.click()}>Import Config</button>
+    <input
+      type="file"
+      accept=".json"
+      bind:this={fileInput}
+      style="display: none;"
+      onchange={importLocalStorage}
+    />
+  </div>
+{/if}
 
 <!-- Edit Mode Button -->
 <button class="opacity-0 hover:opacity-100 h-1/10 w-1/10 fixed bottom-4 right-4 {isEditMode? "btn-add opacity-100": "btn-delete opacity-0 hover:opacity-100"}" onclick={toggleEditMode}>Edit Mode: {isEditMode? "ON": "OFF"}</button>
